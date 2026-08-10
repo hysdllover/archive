@@ -1,0 +1,10 @@
+{
+  "name": "Study Planner",
+  "short_name": "Planner",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FAFAF8",
+  "theme_color": "#FAFAF8",
+  "orientation": "portrait",
+  "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png" }]
+}

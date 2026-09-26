@@ -68,25 +68,6 @@
       <div class="stack">
         <section class="card dday">${ddHtml}</section>
 
-        ${(() => {
-          const ap = st.applies || [];
-          const soon = [];
-          ap.forEach(a => {
-            if (a.docDue && a.docDue >= today) soon.push({ d: a.docDue, t: a.univ + ' 서류' });
-            if (a.interview && a.interview >= today) soon.push({ d: a.interview, t: a.univ + ' 면접' });
-          });
-          soon.sort((x, y) => x.d.localeCompare(y.d));
-          const n = soon.length ? App.diffDays(today, soon[0].d) : null;
-          return `<button class="card linkcard" data-act="go-apply">
-            <span class="grow" style="text-align:left">
-              <span class="card-t" style="display:block;margin:0">수시 원서</span>
-              <span class="small ${n != null && n <= 7 ? '' : 'muted'}" style="${n != null && n <= 7 ? 'color:var(--danger)' : ''}">
-                ${ap.length ? (soon.length ? `${UI.esc(soon[0].t)} D-${n}` : `${ap.length}곳 · 임박한 일정 없음`) : '지원 대학을 등록해 두세요'}</span>
-            </span>
-            <span class="muted">›</span>
-          </button>`;
-        })()}
-
         <section class="card">
           <p class="card-t">오늘</p>
           <div class="spread">
@@ -102,7 +83,10 @@
         </section>
 
         <section class="card">
-          <p class="card-t">최근 7일 · 총 ${UI.hm(weekTotal)}</p>
+          <div class="spread" style="margin-bottom:10px">
+            <p class="card-t" style="margin:0">최근 7일 · 총 ${UI.hm(weekTotal)}</p>
+            <button class="btn sm" data-act="go-stats">통계 ›</button>
+          </div>
           ${UI.barChart(days, { avg: avg7 })}
           ${subRows.length ? `<div class="hr"></div>${subRows.map(([id, m]) => `
             <div style="margin-bottom:8px">
@@ -187,8 +171,8 @@
         const id = b.dataset.id;
         if (b.dataset.act === 'goal-add') addGoal();
         if (b.dataset.act === 'past-toggle') { App.ctx.showPast = !App.ctx.showPast; App.render(); }
+        if (b.dataset.act === 'go-stats') App.go('stats');
         if (b.dataset.act === 'go-sub') { App.ctx.subjectId = id; App.go('subject'); }
-        if (b.dataset.act === 'go-apply') App.go('apply');
         if (b.dataset.act === 'goal-toggle')
           App.Store.set(s => { const g = s.goals.find(x => x.id === id); g.done = !g.done; });
         if (b.dataset.act === 'goal-del')

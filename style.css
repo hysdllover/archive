@@ -237,21 +237,6 @@ table.tt th.h{ width:62px; }
 }
 .srow .btn.icon:active{ color:var(--ink); }
 
-/* 카드형 링크 (홈 → 수시) */
-.linkcard{
-  display:flex; align-items:center; gap:10px; width:100%;
-  background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:13px 14px;
-}
-.linkcard:active{ background:var(--panel-2); }
-
-/* 수시 일정 태그 */
-.dtag{
-  display:inline-flex; align-items:center; gap:5px; height:26px; padding:0 10px;
-  border:1px solid var(--line); border-radius:999px; font-size:11px; color:var(--ink-2);
-}
-.dtag b{ font-weight:400; }
-.dtag.urgent{ border-color:var(--danger); color:var(--danger); }
-.dtag.muted{ opacity:.45; }
 .wrapchips{ flex-wrap:wrap; overflow:visible; }
 
 /* 실전 타이머 */
@@ -261,6 +246,26 @@ table.tt th.h{ width:62px; }
 }
 .count.paused{ color:var(--muted); }
 .count.over{ color:var(--danger); }
+.aclock{ width:100%; max-width:220px; display:block; margin:0 auto; }
+.aclock .face{ fill:var(--panel-2); stroke:var(--line); stroke-width:1; }
+.aclock .tk{ stroke:var(--muted); stroke-width:.6; opacity:.6; }
+.aclock .tk.big{ stroke:var(--ink-2); stroke-width:1.2; opacity:1; }
+.aclock text{ font-size:11px; font-weight:300; fill:var(--ink-2); }
+.aclock .remain{ fill:none; stroke:var(--accent); stroke-width:5; opacity:.35; stroke-linecap:round; }
+.aclock .endmk{ fill:var(--accent); }
+.aclock .hand{ stroke:var(--ink); stroke-linecap:round; }
+.aclock .hand.h{ stroke-width:3.2; }
+.aclock .hand.m{ stroke-width:2; }
+.aclock .hand.s{ stroke:var(--danger); stroke-width:.9; }
+.aclock .pin{ fill:var(--danger); }
+.lapbtn{ min-height:46px; font-size:14px; }
+.laps{ display:flex; flex-direction:column; gap:5px; }
+.lap{ display:grid; grid-template-columns:34px 1fr 42px; gap:8px; align-items:center; font-size:11.5px; }
+.lap .num{ text-align:right; }
+.lap-bar{ height:3px; border-radius:2px; background:var(--line-soft); overflow:hidden; }
+.lap-bar i{ display:block; height:100%; background:var(--accent); opacity:.7; }
+.lap.slow .num{ color:var(--danger); }
+.lap.slow .lap-bar i{ background:var(--danger); }
 table.tt td.tt-head{ background:var(--panel-2); padding:2px 3px; }
 .tt-plabel{ font-size:9.5px; color:var(--ink-2); line-height:1.2; }
 .tt-ptime{ font-size:8.5px; color:var(--muted); }

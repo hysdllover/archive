@@ -29,7 +29,7 @@
       const todoBlock = (list) => list.map(t => `
         <div class="item ${t.done ? 'done' : ''}">
           <input type="checkbox" ${t.done ? 'checked' : ''} data-act="t-toggle" data-id="${t.id}">
-          <span class="t" data-act="t-toggle" data-id="${t.id}">${UI.esc(t.text)}</span>
+          <span class="t" data-act="t-edit" data-id="${t.id}">${UI.esc(t.text)}</span>
           <button class="x" data-act="t-del" data-id="${t.id}" aria-label="삭제">×</button>
         </div>`).join('');
 
@@ -52,7 +52,7 @@
           <div class="spread">
             <div>
               <div class="timer-num num ${running ? 'run' : ''}" id="tclock">${fmt(elapsed)}</div>
-              <div class="small muted">${running ? UI.esc(App.subName(timer.subjectId)) + ' 측정 중' : '과목을 골라 시작'}</div>
+              <div class="small muted">${running ? UI.esc(App.subName(timer.subjectId)) + (timer.memo ? ' · ' + UI.esc(timer.memo) : '') + ' 측정 중' : '과목을 골라 시작'}</div>
             </div>
             <div class="row">
               ${running
@@ -62,6 +62,7 @@
                    <button class="btn pri" data-act="start">시작</button>`}
             </div>
           </div>
+          ${running ? '' : `<input type="text" id="t-memo" placeholder="제목(선택) · 예: 수특 3단원" style="margin-top:10px">`}
           <div class="hr"></div>
           <div class="spread" style="margin-bottom:4px">
             <span class="small muted">기록 ${logs.length}건</span>
@@ -119,17 +120,12 @@
 
         if (a === 'start') {
           const sub = root.querySelector('#t-sub').value;
-          App.Store.set(s => { s.timer = { subjectId: sub, startedAt: Date.now() }; });
+          const memo = root.querySelector('#t-memo').value.trim();
+          App.Store.set(s => { s.timer = { subjectId: sub, startedAt: Date.now(), memo }; });
         }
         if (a === 'cancel') App.Store.set(s => { s.timer = null; });
-        if (a === 'stop') {
-          const mins = Math.max(1, Math.round((Date.now() - App.Store.get().timer.startedAt) / 60000));
-          App.Store.set(s => {
-            s.logs.push({ id: App.uid(), date: App.today(), subjectId: s.timer.subjectId, minutes: mins, memo: '' });
-            s.timer = null;
-          });
-          UI.toast(`${UI.hm(mins)} 기록됨`);
-        }
+        if (a === 'stop') stopTimer();
+        if (a === 't-edit') editTodo(id);
 
         if (a === 'go-mock') App.go('mock');
         if (a === 'log-add') addLog();
@@ -156,6 +152,59 @@
   function fmt(sec) {
     const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, s = sec % 60;
     return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  /* 정지 — 기록 전에 제목·시간 확인 */
+  function stopTimer() {
+    const t = App.Store.get().timer; if (!t) return;
+    const mins = Math.max(1, Math.round((Date.now() - t.startedAt) / 60000));
+    UI.sheet({
+      title: '공부 기록 저장',
+      body: `
+        <div class="grid2">
+          <div class="field"><label>과목</label><select id="st-sub">${UI.subjectOptions(t.subjectId)}</select></div>
+          <div class="field"><label>시간(분)</label><input type="number" id="st-min" inputmode="numeric" value="${mins}"></div>
+        </div>
+        <div class="field"><label>제목</label><input type="text" id="st-memo" value="${UI.esc(t.memo || '')}" placeholder="예: 유전 오답 정리"></div>`,
+      onOk: el => {
+        const min = +el.querySelector('#st-min').value;
+        if (!min || min <= 0) return false;
+        App.Store.set(s => {
+          s.logs.push({
+            id: App.uid(), date: App.today(), subjectId: el.querySelector('#st-sub').value,
+            minutes: min, memo: el.querySelector('#st-memo').value.trim()
+          });
+          s.timer = null;
+        });
+        UI.toast(`${UI.hm(min)} 기록됨`);
+      }
+    });
+  }
+
+  function editTodo(id) {
+    const t = App.Store.get().todos.find(x => x.id === id); if (!t) return;
+    const bg = UI.sheet({
+      title: '할 일 수정',
+      body: `
+        <div class="field"><label>과목</label><select id="te-sub">${UI.subjectOptions(t.subjectId, true)}</select></div>
+        <div class="field"><label>내용</label><textarea id="te-text">${UI.esc(t.text)}</textarea></div>
+        <div class="field"><label>날짜</label><input type="date" id="te-date" value="${t.date}"></div>
+        <button class="btn danger block" id="te-del">삭제</button>`,
+      onOk: el => {
+        const text = el.querySelector('#te-text').value.trim();
+        if (!text) return false;
+        App.Store.set(s => {
+          const x = s.todos.find(y => y.id === id); if (!x) return;
+          x.text = text;
+          x.subjectId = el.querySelector('#te-sub').value;
+          x.date = el.querySelector('#te-date').value || x.date;
+        });
+      }
+    });
+    bg.querySelector('#te-del').onclick = () => {
+      UI.closeSheet();
+      App.Store.set(s => { s.todos = s.todos.filter(x => x.id !== id); });
+    };
   }
 
   function addTodo() {
